@@ -227,3 +227,12 @@ What it does:
   - All mapping layers with primary mappings per parent
 
 After running `seed_data`, the list endpoints and filters (e.g. `vendor_id`, `product_id`, `course_id`) will immediately return populated, realistic data for exploration. 
+
+# Design Highlights
+
+• Modular Django app architecture
+• Strict APIView-based implementation
+• Validation-driven serializers
+• Query filtering support
+• Hierarchical certification path API
+• Interactive Swagger documentation
