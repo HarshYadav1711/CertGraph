@@ -7,6 +7,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.query_params import parse_optional_int
+
 from .models import Certification
 from .serializers import CertificationSerializer
 
@@ -14,10 +16,19 @@ from .serializers import CertificationSerializer
 class CertificationListCreateAPIView(APIView):
     """
     List all certifications or create a new certification.
+    Optional query param: course_id — filter by course primary key.
     """
 
     def get(self, request):
+        course_id_raw = request.query_params.get("course_id")
+        course_id, err = parse_optional_int(course_id_raw, "course_id")
+        if err is not None:
+            return err
+
         certifications = Certification.objects.all()
+        if course_id is not None:
+            certifications = certifications.filter(course_id=course_id)
+
         serializer = CertificationSerializer(certifications, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

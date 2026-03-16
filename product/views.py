@@ -7,6 +7,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.query_params import parse_optional_int
+
 from .models import Product
 from .serializers import ProductSerializer
 
@@ -14,10 +16,19 @@ from .serializers import ProductSerializer
 class ProductListCreateAPIView(APIView):
     """
     List all products or create a new product.
+    Optional query param: vendor_id — filter by vendor primary key.
     """
 
     def get(self, request):
+        vendor_id_raw = request.query_params.get("vendor_id")
+        vendor_id, err = parse_optional_int(vendor_id_raw, "vendor_id")
+        if err is not None:
+            return err
+
         products = Product.objects.all()
+        if vendor_id is not None:
+            products = products.filter(vendor_id=vendor_id)
+
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

@@ -7,6 +7,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.query_params import parse_optional_int
+
 from .models import Course
 from .serializers import CourseSerializer
 
@@ -14,10 +16,19 @@ from .serializers import CourseSerializer
 class CourseListCreateAPIView(APIView):
     """
     List all courses or create a new course.
+    Optional query param: product_id — filter by product primary key.
     """
 
     def get(self, request):
+        product_id_raw = request.query_params.get("product_id")
+        product_id, err = parse_optional_int(product_id_raw, "product_id")
+        if err is not None:
+            return err
+
         courses = Course.objects.all()
+        if product_id is not None:
+            courses = courses.filter(product_id=product_id)
+
         serializer = CourseSerializer(courses, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
