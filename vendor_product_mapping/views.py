@@ -3,6 +3,8 @@ Views for the vendor_product_mapping app.
 """
 
 from django.http import Http404
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,11 +18,26 @@ class VendorProductMappingListCreateAPIView(APIView):
     List all vendor-product mappings or create a new mapping.
     """
 
+    @swagger_auto_schema(
+        operation_description="List all vendor-product mappings.",
+        responses={
+            200: VendorProductMappingSerializer(many=True),
+            400: openapi.Response("Bad request."),
+        },
+    )
     def get(self, request):
         mappings = VendorProductMapping.objects.all()
         serializer = VendorProductMappingSerializer(mappings, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_description="Create a new vendor-product mapping.",
+        request_body=VendorProductMappingSerializer,
+        responses={
+            201: VendorProductMappingSerializer,
+            400: openapi.Response("Validation error."),
+        },
+    )
     def post(self, request):
         serializer = VendorProductMappingSerializer(data=request.data)
         if serializer.is_valid():
@@ -43,11 +60,27 @@ class VendorProductMappingDetailAPIView(APIView):
         except VendorProductMapping.DoesNotExist as exc:
             raise Http404("Vendor-product mapping not found.") from exc
 
+    @swagger_auto_schema(
+        operation_description="Retrieve a vendor-product mapping by ID.",
+        responses={
+            200: VendorProductMappingSerializer,
+            404: openapi.Response("Vendor-product mapping not found."),
+        },
+    )
     def get(self, request, pk: int):
         mapping = self.get_object(pk)
         serializer = VendorProductMappingSerializer(mapping)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_description="Update a vendor-product mapping.",
+        request_body=VendorProductMappingSerializer,
+        responses={
+            200: VendorProductMappingSerializer,
+            400: openapi.Response("Validation error."),
+            404: openapi.Response("Vendor-product mapping not found."),
+        },
+    )
     def put(self, request, pk: int):
         mapping = self.get_object(pk)
         serializer = VendorProductMappingSerializer(mapping, data=request.data)
@@ -59,6 +92,15 @@ class VendorProductMappingDetailAPIView(APIView):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(
+        operation_description="Partially update a vendor-product mapping.",
+        request_body=VendorProductMappingSerializer,
+        responses={
+            200: VendorProductMappingSerializer,
+            400: openapi.Response("Validation error."),
+            404: openapi.Response("Vendor-product mapping not found."),
+        },
+    )
     def patch(self, request, pk: int):
         mapping = self.get_object(pk)
         serializer = VendorProductMappingSerializer(
@@ -72,6 +114,13 @@ class VendorProductMappingDetailAPIView(APIView):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(
+        operation_description="Delete a vendor-product mapping.",
+        responses={
+            204: openapi.Response("Vendor-product mapping deleted."),
+            404: openapi.Response("Vendor-product mapping not found."),
+        },
+    )
     def delete(self, request, pk: int):
         mapping = self.get_object(pk)
         mapping.delete()
