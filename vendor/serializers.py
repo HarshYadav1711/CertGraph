@@ -1,19 +1,43 @@
 """
 Serializers for the vendor app.
-
-Models will be added in a later step; this module exists to keep the
-application structure modular and ready for API implementation.
 """
 
 from rest_framework import serializers
 
+from .models import Vendor
 
-class VendorSerializer(serializers.Serializer):
+
+class VendorSerializer(serializers.ModelSerializer):
     """
-    Placeholder serializer for vendor entities.
-
-    Fields will be defined once the Vendor model is implemented.
+    Serializer for Vendor entities.
     """
 
-    pass
+    class Meta:
+        model = Vendor
+        fields = [
+            "id",
+            "name",
+            "code",
+            "description",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def validate_name(self, value: str) -> str:
+        if not value:
+            raise serializers.ValidationError("Name is required.")
+        return value
+
+    def validate_code(self, value: str) -> str:
+        if not value:
+            raise serializers.ValidationError("Code is required.")
+
+        qs = Vendor.objects.filter(code__iexact=value)
+        if self.instance is not None:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError("A vendor with this code already exists.")
+        return value
 
