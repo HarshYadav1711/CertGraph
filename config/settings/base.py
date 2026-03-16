@@ -33,6 +33,8 @@ INSTALLED_APPS = [
     # Third-party apps
     "rest_framework",
     "drf_yasg",
+    # Core/shared app
+    "core",
     # Domain apps
     "vendor",
     "product",
