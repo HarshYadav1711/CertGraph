@@ -11,6 +11,12 @@ from rest_framework.views import APIView
 
 from .models import Vendor
 from .serializers import VendorSerializer
+from course.models import Course
+from course_certification_mapping.models import CourseCertificationMapping
+from product.models import Product
+from product_course_mapping.models import ProductCourseMapping
+from certification.models import Certification
+from vendor_product_mapping.models import VendorProductMapping
 
 
 class VendorListCreateAPIView(APIView):
@@ -123,4 +129,123 @@ class VendorDetailAPIView(APIView):
         vendor = self.get_object(pk)
         vendor.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class VendorCertificationPathAPIView(APIView):
+    """
+    Read-only endpoint returning the full certification path for a vendor.
+
+    Structure:
+    - Vendor
+      - Products
+        - Courses
+          - Certifications
+    """
+
+    def get_vendor(self, vendor_id: int) -> Vendor:
+        try:
+            return Vendor.objects.get(pk=vendor_id)
+        except Vendor.DoesNotExist as exc:
+            raise Http404("Vendor not found.") from exc
+
+    @swagger_auto_schema(
+        operation_description=(
+            "Return the full certification path for a vendor, including "
+            "products, courses, and certifications."
+        ),
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "vendor": openapi.Schema(type=openapi.TYPE_OBJECT),
+                    "products": openapi.Schema(
+                        type=openapi.TYPE_ARRAY,
+                        items=openapi.Schema(type=openapi.TYPE_OBJECT),
+                    ),
+                },
+            ),
+            404: openapi.Response("Vendor not found."),
+        },
+    )
+    def get(self, request, vendor_id: int):
+        vendor = self.get_vendor(vendor_id)
+
+        # Products linked via VendorProductMapping
+        product_mappings = VendorProductMapping.objects.filter(parent=vendor).select_related(
+            "child"
+        )
+        products = [mapping.child for mapping in product_mappings]
+        product_ids = [p.id for p in products]
+
+        # Courses linked via ProductCourseMapping
+        product_course_mappings = ProductCourseMapping.objects.filter(
+            parent_id__in=product_ids
+        ).select_related("child")
+        courses = [m.child for m in product_course_mappings]
+        course_ids = [c.id for c in courses]
+
+        # Certifications linked via CourseCertificationMapping
+        course_cert_mappings = CourseCertificationMapping.objects.filter(
+            parent_id__in=course_ids
+        ).select_related("child")
+        certifications = [m.child for m in course_cert_mappings]
+
+        # Index courses and certifications by their parents
+        courses_by_product: dict[int, list[Course]] = {}
+        for mapping in product_course_mappings:
+            courses_by_product.setdefault(mapping.parent_id, []).append(mapping.child)
+
+        certs_by_course: dict[int, list[Certification]] = {}
+        for mapping in course_cert_mappings:
+            certs_by_course.setdefault(mapping.parent_id, []).append(mapping.child)
+
+        # Build nested structure
+        vendor_data = VendorSerializer(vendor).data
+
+        products_payload = []
+        for product in products:
+            product_dict = {
+                "id": product.id,
+                "name": product.name,
+                "code": product.code,
+                "description": product.description,
+                "is_active": product.is_active,
+            }
+
+            product_courses = courses_by_product.get(product.id, [])
+            courses_payload = []
+            for course in product_courses:
+                course_dict = {
+                    "id": course.id,
+                    "name": course.name,
+                    "code": course.code,
+                    "description": course.description,
+                    "is_active": course.is_active,
+                }
+
+                course_certs = certs_by_course.get(course.id, [])
+                certs_payload = [
+                    {
+                        "id": cert.id,
+                        "name": cert.name,
+                        "code": cert.code,
+                        "description": cert.description,
+                        "is_active": cert.is_active,
+                    }
+                    for cert in course_certs
+                ]
+
+                course_dict["certifications"] = certs_payload
+                courses_payload.append(course_dict)
+
+            product_dict["courses"] = courses_payload
+            products_payload.append(product_dict)
+
+        payload = {
+            "vendor": vendor_data,
+            "products": products_payload,
+        }
+
+        return Response(payload, status=status.HTTP_200_OK)
+
 
