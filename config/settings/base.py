@@ -33,6 +33,14 @@ INSTALLED_APPS = [
     # Third-party apps
     "rest_framework",
     "drf_yasg",
+    # Domain apps
+    "vendor",
+    "product",
+    "course",
+    "certification",
+    "vendor_product_mapping",
+    "product_course_mapping",
+    "course_certification_mapping",
 ]
 
 MIDDLEWARE = [

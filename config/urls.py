@@ -10,7 +10,7 @@ This module wires up:
 """
 
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import include, path, re_path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
@@ -27,6 +27,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    # Documentation
     re_path(
         r"^swagger(?P<format>\.json|\.yaml)$",
         schema_view.without_ui(cache_timeout=0),
@@ -42,4 +43,12 @@ urlpatterns = [
         schema_view.with_ui("redoc", cache_timeout=0),
         name="schema-redoc",
     ),
+    # API entrypoints
+    path("api/vendor/", include("vendor.urls")),
+    path("api/product/", include("product.urls")),
+    path("api/course/", include("course.urls")),
+    path("api/certification/", include("certification.urls")),
+    path("api/vendor-product/", include("vendor_product_mapping.urls")),
+    path("api/product-course/", include("product_course_mapping.urls")),
+    path("api/course-certification/", include("course_certification_mapping.urls")),
 ]
