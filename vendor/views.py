@@ -2,13 +2,13 @@
 Views for the vendor app.
 """
 
-from django.http import Http404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.utils.object_helpers import get_object_or_404_custom
 from .models import Vendor
 from .serializers import VendorSerializer
 from course.models import Course
@@ -61,10 +61,7 @@ class VendorDetailAPIView(APIView):
     """
 
     def get_object(self, pk: int) -> Vendor:
-        try:
-            return Vendor.objects.get(pk=pk)
-        except Vendor.DoesNotExist as exc:
-            raise Http404("Vendor not found.") from exc
+        return get_object_or_404_custom(Vendor, pk=pk)
 
     @swagger_auto_schema(
         operation_description="Retrieve a single vendor by ID.",
@@ -143,10 +140,7 @@ class VendorCertificationPathAPIView(APIView):
     """
 
     def get_vendor(self, vendor_id: int) -> Vendor:
-        try:
-            return Vendor.objects.get(pk=vendor_id)
-        except Vendor.DoesNotExist as exc:
-            raise Http404("Vendor not found.") from exc
+        return get_object_or_404_custom(Vendor, pk=vendor_id)
 
     @swagger_auto_schema(
         operation_description=(

@@ -2,13 +2,13 @@
 Views for the product_course_mapping app.
 """
 
-from django.http import Http404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.utils.object_helpers import get_object_or_404_custom
 from .models import ProductCourseMapping
 from .serializers import ProductCourseMappingSerializer
 
@@ -55,10 +55,7 @@ class ProductCourseMappingDetailAPIView(APIView):
     """
 
     def get_object(self, pk: int) -> ProductCourseMapping:
-        try:
-            return ProductCourseMapping.objects.get(pk=pk)
-        except ProductCourseMapping.DoesNotExist as exc:
-            raise Http404("Product-course mapping not found.") from exc
+        return get_object_or_404_custom(ProductCourseMapping, pk=pk)
 
     @swagger_auto_schema(
         operation_description="Retrieve a product-course mapping by ID.",

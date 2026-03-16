@@ -2,7 +2,6 @@
 Views for the course app.
 """
 
-from django.http import Http404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -10,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.query_params import parse_optional_int
+from core.utils.object_helpers import get_object_or_404_custom
 
 from .models import Course
 from .serializers import CourseSerializer
@@ -74,10 +74,7 @@ class CourseDetailAPIView(APIView):
     """
 
     def get_object(self, pk: int) -> Course:
-        try:
-            return Course.objects.get(pk=pk)
-        except Course.DoesNotExist as exc:
-            raise Http404("Course not found.") from exc
+        return get_object_or_404_custom(Course, pk=pk)
 
     @swagger_auto_schema(
         operation_description="Retrieve a single course by ID.",

@@ -2,13 +2,13 @@
 Views for the vendor_product_mapping app.
 """
 
-from django.http import Http404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.utils.object_helpers import get_object_or_404_custom
 from .models import VendorProductMapping
 from .serializers import VendorProductMappingSerializer
 
@@ -55,10 +55,7 @@ class VendorProductMappingDetailAPIView(APIView):
     """
 
     def get_object(self, pk: int) -> VendorProductMapping:
-        try:
-            return VendorProductMapping.objects.get(pk=pk)
-        except VendorProductMapping.DoesNotExist as exc:
-            raise Http404("Vendor-product mapping not found.") from exc
+        return get_object_or_404_custom(VendorProductMapping, pk=pk)
 
     @swagger_auto_schema(
         operation_description="Retrieve a vendor-product mapping by ID.",

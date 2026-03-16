@@ -2,13 +2,13 @@
 Views for the course_certification_mapping app.
 """
 
-from django.http import Http404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.utils.object_helpers import get_object_or_404_custom
 from .models import CourseCertificationMapping
 from .serializers import CourseCertificationMappingSerializer
 
@@ -56,10 +56,7 @@ class CourseCertificationMappingDetailAPIView(APIView):
     """
 
     def get_object(self, pk: int) -> CourseCertificationMapping:
-        try:
-            return CourseCertificationMapping.objects.get(pk=pk)
-        except CourseCertificationMapping.DoesNotExist as exc:
-            raise Http404("Course-certification mapping not found.") from exc
+        return get_object_or_404_custom(CourseCertificationMapping, pk=pk)
 
     @swagger_auto_schema(
         operation_description="Retrieve a course-certification mapping by ID.",

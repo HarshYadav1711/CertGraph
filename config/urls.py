@@ -11,6 +11,7 @@ This module wires up:
 
 from django.contrib import admin
 from django.urls import include, path, re_path
+from django.views.generic import RedirectView
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
@@ -28,6 +29,12 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    # Landing page: redirect to Swagger UI
+    path(
+        "",
+        RedirectView.as_view(pattern_name="schema-swagger-ui", permanent=False),
+        name="root-redirect",
+    ),
     path("admin/", admin.site.urls),
     # Documentation
     re_path(
