@@ -44,11 +44,11 @@ urlpatterns = [
         name="schema-redoc",
     ),
     # API entrypoints
-    path("api/vendor/", include("vendor.urls")),
-    path("api/product/", include("product.urls")),
-    path("api/course/", include("course.urls")),
-    path("api/certification/", include("certification.urls")),
-    path("api/vendor-product/", include("vendor_product_mapping.urls")),
-    path("api/product-course/", include("product_course_mapping.urls")),
-    path("api/course-certification/", include("course_certification_mapping.urls")),
+    path("api/", include("vendor.urls")),
+    path("api/", include("product.urls")),
+    path("api/", include("course.urls")),
+    path("api/", include("certification.urls")),
+    path("api/", include("vendor_product_mapping.urls")),
+    path("api/", include("product_course_mapping.urls")),
+    path("api/", include("course_certification_mapping.urls")),
 ]

@@ -1,12 +1,26 @@
 """
 URL configuration for the course_certification_mapping app.
-
-Routes will be added when mapping API endpoints are implemented.
 """
 
 from django.urls import path
 
+from .views import (
+    CourseCertificationMappingDetailAPIView,
+    CourseCertificationMappingListCreateAPIView,
+)
+
 app_name = "course_certification_mapping"
 
-urlpatterns: list[path] = []
+urlpatterns = [
+    path(
+        "course-certification-mappings/",
+        CourseCertificationMappingListCreateAPIView.as_view(),
+        name="course-certification-mapping-list-create",
+    ),
+    path(
+        "course-certification-mappings/<int:pk>/",
+        CourseCertificationMappingDetailAPIView.as_view(),
+        name="course-certification-mapping-detail",
+    ),
+]
 

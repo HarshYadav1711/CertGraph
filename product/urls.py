@@ -1,12 +1,15 @@
 """
 URL configuration for the product app.
-
-Routes will be added when product API endpoints are implemented.
 """
 
 from django.urls import path
 
+from .views import ProductDetailAPIView, ProductListCreateAPIView
+
 app_name = "product"
 
-urlpatterns: list[path] = []
+urlpatterns = [
+    path("products/", ProductListCreateAPIView.as_view(), name="product-list-create"),
+    path("products/<int:pk>/", ProductDetailAPIView.as_view(), name="product-detail"),
+]
 

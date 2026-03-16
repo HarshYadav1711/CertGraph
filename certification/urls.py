@@ -1,12 +1,23 @@
 """
 URL configuration for the certification app.
-
-Routes will be added when certification API endpoints are implemented.
 """
 
 from django.urls import path
 
+from .views import CertificationDetailAPIView, CertificationListCreateAPIView
+
 app_name = "certification"
 
-urlpatterns: list[path] = []
+urlpatterns = [
+    path(
+        "certifications/",
+        CertificationListCreateAPIView.as_view(),
+        name="certification-list-create",
+    ),
+    path(
+        "certifications/<int:pk>/",
+        CertificationDetailAPIView.as_view(),
+        name="certification-detail",
+    ),
+]
 

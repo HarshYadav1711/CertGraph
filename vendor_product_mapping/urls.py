@@ -1,12 +1,26 @@
 """
 URL configuration for the vendor_product_mapping app.
-
-Routes will be added when mapping API endpoints are implemented.
 """
 
 from django.urls import path
 
+from .views import (
+    VendorProductMappingDetailAPIView,
+    VendorProductMappingListCreateAPIView,
+)
+
 app_name = "vendor_product_mapping"
 
-urlpatterns: list[path] = []
+urlpatterns = [
+    path(
+        "vendor-product-mappings/",
+        VendorProductMappingListCreateAPIView.as_view(),
+        name="vendor-product-mapping-list-create",
+    ),
+    path(
+        "vendor-product-mappings/<int:pk>/",
+        VendorProductMappingDetailAPIView.as_view(),
+        name="vendor-product-mapping-detail",
+    ),
+]
 
